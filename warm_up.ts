@@ -1,13 +1,13 @@
 console.log("===============ts==================");
 
+// warm up的ts笔记随附代码
+
 // 实现ValueOf<T>，获取对象的value类型，类似于获取key的keyof
 // keyof获取对象的key，之后通过[]获取key对应的value
 type ValueOf<T> = T[keyof T];
 
 type o_value = ValueOf<{ a: string, b: number }>; // string | number
 type o_key = keyof { a: string, b: number }; // "a" | "b"
-
-// 
 
 type tuple = [number, string]
 type tuple_value = tuple[0 | 1] // number | string
@@ -68,8 +68,9 @@ type test_params = Params<F> // [number, string]
 
 // 直接赋值
 type fn = string
-type Fn<T> = T extends infer R ? R : never
+type Fn<T> = T extends infer R ? R : null
 type test_fn = Fn<string> // string
+type test_fn2 = Fn<never>
 
 // 循环
 // 递归遍历数组
@@ -81,5 +82,19 @@ type test_loop = Loop<[1, 2, 3]> // [1,2,3] | [2,3] | [3] | []
 
 // 实现map
 type Mapp<T> = T extends [infer Head, ...infer Rest] ? [{ name: Head }, ...Mapp<Rest>] : []
+type test_map = Mapp<[1, 2, 3]> // [{name: 1}, {name: 2}, {name: 3}]
+// 实现filter
+type FilterNumber<T> = T extends [infer Head, ...infer Rest]
+    ? Head extends number // 判断Head是否为number
+    ? [Head, ...FilterNumber<Rest>] // 是number时继续递归
+    : FilterNumber<Rest>
+    : []
 
-type test_map = Mapp<[1, 2, 3]> // [1, 2, 3]
+type test_filter = FilterNumber<[1, 'a', 2]> // [1, 2]
+
+// 实现返回前N个值，若N > List.length，则返回List
+type Take<List, N extends number, output extends any[] = []> = List extends [infer Head, ...infer Rest]
+    ? output['length'] extends N ? output : Take<Rest, N, [...output, Head]> // 不等于N时继续递归
+    : output // List为空时返回output
+
+type test_take = Take<[5, 2, 3], 1> // [1, 2]
